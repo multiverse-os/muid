@@ -25,9 +25,9 @@ type Id [binaryRawLength]byte
 
 // Errors
 var (
-	errInvalid  = fmt.Errorf("mid: invalid Id")
-	errRandom   = fmt.Sprintf("mid: cannot generate random number:")
-	errScanning = fmt.Sprintf("mid: scanning unsupported type:")
+	errInvalid  = fmt.Errorf("id: invalid Id")
+	errRandom   = fmt.Sprintf("id: cannot generate random number:")
+	errScanning = fmt.Sprintf("id: scanning unsupported type:")
 )
 
 // TODO: Should have few more options beyond 32 to extend use to more broad
