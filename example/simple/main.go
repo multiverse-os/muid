@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	id "../../id"
+	id "github.com/multiverse-os/muid"
 )
 
 func main() {
