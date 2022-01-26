@@ -31,7 +31,8 @@ var (
 )
 
 // TODO: Should have few more options beyond 32 to extend use to more broad
-// usecases
+// usecases. This also should be using the newly build encoding.go file rather
+// than this encodnig const string. 
 const (
 	stringEncodedLength = 20
 	binaryRawLength     = 12
@@ -116,10 +117,10 @@ func (self Id) String() string {
 	return *(*string)(unsafe.Pointer(&text))
 }
 
-func (self Id) NoPrefix() string {
+func (self Id) NoPrefix() Id {
 	text := make([]byte, stringEncodedLength)
 	encode(text, self[:])
-	return string([]rune(*(*string)(unsafe.Pointer(&text)))[2:20])
+	return Id{[]rune(*(*string)(unsafe.Pointer(&text)))[2:20]}
 }
 
 func (self Id) Short() string {
@@ -128,6 +129,9 @@ func (self Id) Short() string {
 	return string([]rune(*(*string)(unsafe.Pointer(&text)))[10:20])
 }
 
+// TODO: Marshal text should not be a method of the object, it should take in
+// bytes and return the Id. So either this is mis-named or it is improperly
+// implemented
 func (self Id) MarshalText() ([]byte, error) {
 	text := make([]byte, stringEncodedLength)
 	encode(text, self[:])
