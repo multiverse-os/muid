@@ -105,10 +105,16 @@ func NewWithTime(t time.Time) (id Id) {
 	return id
 }
 
+// TODO: This should be marshal actually bc now it imples it generates an Id
+// from a string deterministically
 func FromString(id string) (Id, error) {
 	i := &Id{}
 	err := i.UnmarshalText([]byte(id))
 	return *i, err
+}
+
+func MarshalId(idString string) (id Id, err error) {
+  return id, err
 }
 
 func (self Id) String() string {
@@ -117,10 +123,10 @@ func (self Id) String() string {
 	return *(*string)(unsafe.Pointer(&text))
 }
 
-func (self Id) NoPrefix() Id {
+func (self Id) NoPrefix() string {
 	text := make([]byte, stringEncodedLength)
 	encode(text, self[:])
-	return Id{[]rune(*(*string)(unsafe.Pointer(&text)))[2:20]}
+	return string([]rune(*(*string)(unsafe.Pointer(&text)))[2:20])
 }
 
 func (self Id) Short() string {

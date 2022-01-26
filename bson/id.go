@@ -16,15 +16,6 @@ type ObjectID [12]byte
 var objectIDCounter = readRandomUint32()
 var processUnique = processUniqueBytes()
 
-func init() {
-	go func() {
-		for {
-			time.Sleep(time.Second)
-			objectIDCounter = readRandomUint32()
-		}
-	}()
-}
-
 func NewID() string {
 	return NewObjectID().Hex()
 }
