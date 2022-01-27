@@ -7,7 +7,6 @@ import (
   "encoding/hex"
 	"fmt"
 	"hash/crc32"
-  "hash/adler32"
 	//"io"
 	"math/rand"
 	"os"
@@ -142,7 +141,7 @@ func NewWithTime(timestamp time.Time) Id {
   // TODO: Just use the id object to store the data instead of creatnig
   //       a possibly uneccessary buffer
   var id []byte 
-  id = make([]byte, 12, 64)
+  id = make([]byte, 8, 64)
 
   var byteBuffer []byte
 
@@ -178,27 +177,11 @@ func NewWithTime(timestamp time.Time) Id {
   fmt.Println("base32 version of id: ", base32Id)
   fmt.Println("byte slice version of base32 id: ", []byte(base32Id))
 
-  // NOTE: We could just use 2 bytes and do the checksum and only check against
-  // first and last. In this way we could use sha3 and do something similar
   var crc32Id []byte
-  crc32Id = make([]byte, 4)
+  crc32Id = make([]byte, 64)
   binary.BigEndian.PutUint32(crc32Id, crc32.ChecksumIEEE(id))
   fmt.Println("crc32 version of id: ", crc32Id)
   fmt.Println("string version of crc32 id: ", string(crc32Id))
-
-  var adler32Id []byte
-  adler32Id = make([]byte, 4)
-  binary.BigEndian.PutUint32(adler32Id, adler32.Checksum(id))
-  fmt.Println("adler32 version of id: ", adler32Id)
-  fmt.Println("string version of adler32 id: ", string(adler32Id))
-
-  // TODO: The resulting id MUST
-  //         * be easily converted to a string that is base32 or base58 or base64
-  //           or at least URL safe
-  //         * must be able to sort using that string
-  //         * easily convert that string back into the id object 
-  //         * contain some sort of checksum to valdiate if an id could
-  //           be valid or not
 
 
   // TODO: Now put in the random bits based on the length

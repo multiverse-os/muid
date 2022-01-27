@@ -3,7 +3,17 @@ package muid
 import (
 	"fmt"
 	"strings"
+  "encoding/base32"
 )
+
+
+func (self Id) Base32()  Id {
+  data, _ := base32.StdEncoding.DecodeString(string(self.Bytes()))
+  return Id(data)
+}
+
+// TODO: This might all be irrelevant and should opt to use standard libraries
+// to get these conversions. 
 
 type Encoding uint8
 
