@@ -141,8 +141,34 @@ func NewWithTime(timestamp time.Time) Id {
   // then checking it against the checksum 
   // TODO: Just use the id object to store the data instead of creatnig
   //       a possibly uneccessary buffer
+
+
+  // NOTE: This is what we are aiming to compete with
+  // UUID is 16 bytes
+  // xid which is heavily inspiring this library is
+  //   4 (time) + 3 (machine id) + 2 (process id) + 3 (nonce)
+  // xid is 12 bytes
+
+  // muid is aiming to shirk the machine id and use the time as a nonce
+  // to allow for more random bits and a checksum
+
+  // 4 (time) + 3 (process id) + (1-6) + (2-4)
+  //  even with 3 byte process id we can get and using the slim checksum
+  //  we can get 3 bytes of random data which is important
+  //  otherwise we can also use machine id and get 1 byte of random
+
+  //   [ look into how xid is pushing the process id down to 2 bytes 
+
+  // TODO: Was already leaning towards something like this but for reference xid
+  // uses: 
+  // Base32 hex encoded by default (16 bytes storage when transported as printable string)
+
+  // TODO: xid is adds so much fucking code just to get a downcased version of
+  // base32. When you can just do the normal base32 and downcase it (and upcase
+  // on reverse operations)... 
+
   var id []byte 
-  id = make([]byte, 12, 64)
+  id = make([]byte, 12)
 
   var byteBuffer []byte
 
@@ -158,21 +184,39 @@ func NewWithTime(timestamp time.Time) Id {
   fmt.Println("byte buffer: %v", byteBuffer)
   id = append(id, byteBuffer...)
 
+  // TODO: This version will give us 2 bytes of pid
 
-  byteBuffer = make([]byte, 4)
-  binary.LittleEndian.PutUint32(byteBuffer, uint32(pid))
+  // NOTE: By shifting the pid to the right by 8 bytes and by doing this we
+  //       but LOL just use the fucking go fuckions. look how I did it below
+  //       that is actually readable by most programmers and just as effective
+  fmt.Println("pid >> 8: ", (pid >> 8))
+  fmt.Println("byte(pid >> 8): ", byte(pid >> 8))
+  id[5] = byte(pid >> 8)
+
+	id[6] = byte(pid)
+  fmt.Println("pid: ", pid)
+  fmt.Println("byte(pid): ", byte(pid))
+
+  binary.BigEndian.Uint16(id[7:9])
+
+
+  byteBuffer = make([]byte, 2)
+  binary.LittleEndian.PutUint16(byteBuffer, uint16(pid))
   fmt.Println("byte buffer: %v", byteBuffer)
-  id = append(id, byteBuffer...)
+  //id = append(id, byteBuffer...)
 
 
 
   fmt.Println("byte slice version of id: ", id)
   fmt.Println("string version of id: ", string(id))
 
-  hexId := hex.EncodeToString(id[:])
+  hexId := hex.EncodeToString(id)
   fmt.Println("hex version of id: ", hexId)
   fmt.Println("byte slice version of hex id: ", []byte(hexId))
 
+  // TODO Add ascii58 example
+  //b85 := make([]byte, ascii85.MaxEncodedLen(len(t)))
+	//n, _, _ := ascii85.Decode(b85, t, true)
   
 	base32Id := base32.StdEncoding.EncodeToString(id[:])
   fmt.Println("base32 version of id: ", base32Id)
@@ -223,6 +267,39 @@ func NewWithTime(timestamp time.Time) Id {
 	//id[11] = byte(i)
 	return Id(id)
 }
+
+func (self Id) Pid() uint16 {
+	return binary.BigEndian.Uint16(self[7:9])
+}
+
+
+//func readPlatformMachineID() (string, error) {
+//	b, err := ioutil.ReadFile("/etc/machine-id")
+//	if err != nil || len(b) == 0 {
+//		b, err = ioutil.ReadFile("/sys/class/dmi/id/product_uuid")
+//	}
+//	return string(b), err
+//}
+
+//func readMachineID() []byte {
+//	id := make([]byte, 3)
+//	hid, err := readPlatformMachineID()
+//	if err != nil || len(hid) == 0 {
+//		hid, err = os.Hostname()
+//	}
+//	if err == nil && len(hid) != 0 {
+//		hw := md5.New()
+//		hw.Write([]byte(hid))
+//		copy(id, hw.Sum(nil))
+//	} else {
+//		// Fallback to rand number if machine id can't be gathered
+//		if _, randErr := rand.Reader.Read(id); randErr != nil {
+//			panic(fmt.Errorf("xid: cannot get hostname nor generate a random number: %v; %v", err, randErr))
+//		}
+//	}
+//	return id
+//}
+
 
 func (self Id) Timestamp() time.Time {
 	unixTime := binary.BigEndian.Uint32(self[0:4])
