@@ -6,6 +6,9 @@ import (
 )
 
 // TODO: Length should be variable
+const (
+  binaryRawLength     = 12
+)
 
 func RandomBytes(size int) []byte {
 	if binaryRawLength < size {

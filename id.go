@@ -37,10 +37,12 @@ import (
 //
 // for reals right?
 
+// TODO: Used by [12]byte but the goal is to move to a variable length
+//       Id concept
+type Id []byte
 
-const binaryRawLength     = 12
-
-type Id [binaryRawLength]byte
+// TODO: Create a Length() function that will alter the byte array so that the
+// legnth is minimum 
 
 // Errors
 
@@ -61,6 +63,7 @@ const (
 // function or init then we use memory and binary space instead of just binary
 // space 
 var (
+  // a real nonce needs to increment up always
 	objectIdNonce    = randomInt32()
 	threeRandomBytes = randomBytes(3)
   // TODO: One thing xid did really really well is this. Using the pid as the
@@ -69,25 +72,25 @@ var (
   // little overhead. 
 	pid              = os.Getpid()
   // TODO: This is totally uncessary 
-	nilId            Id
+	//nilId            Id
   // TODO: Really? REally? REALLY? we just need to have this space in the memory
   // locked BECAUSE!
-	dec              [256]byte
+	//   dec              [256]byte
 )
 
 func init() {
 	mathrand.Seed(time.Now().UTC().UnixNano())
 
-	for i := 0; i < 256; i++ {
-		dec[i] = 0xFF
-	}
-	for i := 0; i < len(encoding); i++ {
-		dec[encoding[i]] = byte(i)
-	}
-	b := []byte("m")
-	if len(b) > 1 {
-		pid ^= int(crc32.ChecksumIEEE(b))
-	}
+	//for i := 0; i < 256; i++ {
+	//	dec[i] = 0xFF
+	//}
+	//for i := 0; i < len(encoding); i++ {
+	//	dec[encoding[i]] = byte(i)
+	//}
+	//b := []byte("m")
+	//if len(b) > 1 {
+	//	pid ^= int(crc32.ChecksumIEEE(b))
+	//}
 }
 
 
@@ -121,6 +124,25 @@ func New() Id {
 //       9) Easy variable length limited but a hard lower limit for security
 //      
 func NewWithTime(t time.Time) (id Id) {
+  // So the most minimal version will be 
+  // Time  + Pid (Machine Random) + Regular Random + Checksum
+  //                                  (giving us our variable length)
+
+  // Time is already a nonce, it always increments and gives us ability 
+  // to sort
+  // Making the minimum length 
+  //   4 + 2 + X + 2 (< 9)
+
+  // What is definitely missing is a built in checksum that can be divided
+  // off and used to verify the rest is correct ensuring that the id is
+  // valid. but it would be required to be present at end or start. 
+  // technically it could be in the middle but you would ahve to do a 
+  // weird process of extracting it and combining the first and half portions
+  // then checking it against the checksum 
+
+	binary.BigEndian.PutUint32(b[0:4], uint32(timestamp.Unix()))
+  //oiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii so easy!
+
 	binary.BigEndian.PutUint32(id[:], uint32(t.Unix()))
 	id[0] = byte(183)
 	id[1] = byte(192)
@@ -144,9 +166,9 @@ func FromString(id string) (Id, error) {
 	return *i, err
 }
 
-func MarshalId(idString string) (id Id, err error) {
-  return id, err
-}
+//func MarshalId(idString string) (id Id, err error) {
+//  return id, err
+//}
 
 func (self Id) String() string {
 	text := make([]byte, stringEncodedLength)
@@ -154,99 +176,109 @@ func (self Id) String() string {
 	return *(*string)(unsafe.Pointer(&text))
 }
 
-func (self Id) NoPrefix() string {
-	text := make([]byte, stringEncodedLength)
-	encode(text, self[:])
-	return string([]rune(*(*string)(unsafe.Pointer(&text)))[2:20])
-}
-
-func (self Id) Short() string {
-	text := make([]byte, stringEncodedLength)
-	encode(text, self[:])
-	return string([]rune(*(*string)(unsafe.Pointer(&text)))[10:20])
-}
+//func (self Id) NoPrefix() string {
+//	text := make([]byte, stringEncodedLength)
+//	encode(text, self[:])
+//	return string([]rune(*(*string)(unsafe.Pointer(&text)))[2:20])
+//}
+//
+//func (self Id) Short() string {
+//	text := make([]byte, stringEncodedLength)
+//	encode(text, self[:])
+//	return string([]rune(*(*string)(unsafe.Pointer(&text)))[10:20])
+//}
 
 // TODO: Marshal text should not be a method of the object, it should take in
 // bytes and return the Id. So either this is mis-named or it is improperly
 // implemented
-func (self Id) MarshalText() ([]byte, error) {
-	text := make([]byte, stringEncodedLength)
-	encode(text, self[:])
-	return text, nil
-}
+//func (self Id) MarshalText() ([]byte, error) {
+//	text := make([]byte, stringEncodedLength)
+//	encode(text, self[:])
+//	return text, nil
+//}
+//
+//func (self Id) MarshalJSON() ([]byte, error) {
+//	if self.IsNil() {
+//		return []byte("null"), nil
+//	}
+//	text, err := self.MarshalText()
+//	return []byte(`"` + string(text) + `"`), err
+//}
 
-func (self Id) MarshalJSON() ([]byte, error) {
-	if self.IsNil() {
-		return []byte("null"), nil
-	}
-	text, err := self.MarshalText()
-	return []byte(`"` + string(text) + `"`), err
-}
+// TODO: I hate this function, this can be done in a way that is easy
+//       to understand and modify because most developer encoutering
+//       this will start crying because they dont understand what 
+//       is happening. And Go provides us with all the tools (esp 1.9)
+//       to do this exactly functionality but in such a way that is
+//       'elegant' syntax
+//        OH BIG TALK JERK! WE#LL LETS SEE IT!
+//       ok :
+//            binary.BigEndian.PutUint32(b[0:4], uint32(timestamp.Unix()))
+//       OH THAT IS NICE
+//func encode(dst, id []byte) {
+//	_ = dst[19]
+//	_ = id[11]
+//	dst[19] = encoding[(id[11]<<4)&0x1F]
+//	dst[18] = encoding[(id[11]>>1)&0x1F]
+//	dst[17] = encoding[(id[11]>>6)&0x1F|(id[10]<<2)&0x1F]
+//	dst[16] = encoding[id[10]>>3]
+//	dst[15] = encoding[id[9]&0x1F]
+//	dst[14] = encoding[(id[9]>>5)|(id[8]<<3)&0x1F]
+//	dst[13] = encoding[(id[8]>>2)&0x1F]
+//	dst[12] = encoding[id[8]>>7|(id[7]<<1)&0x1F]
+//	dst[11] = encoding[(id[7]>>4)&0x1F|(id[6]<<4)&0x1F]
+//	dst[10] = encoding[(id[6]>>1)&0x1F]
+//	dst[9] = encoding[(id[6]>>6)&0x1F|(id[5]<<2)&0x1F]
+//	dst[8] = encoding[id[5]>>3]
+//	dst[7] = encoding[id[4]&0x1F]
+//	dst[6] = encoding[id[4]>>5|(id[3]<<3)&0x1F]
+//	dst[5] = encoding[(id[3]>>2)&0x1F]
+//	dst[4] = encoding[id[3]>>7|(id[2]<<1)&0x1F]
+//	dst[3] = encoding[(id[2]>>4)&0x1F|(id[1]<<4)&0x1F]
+//	dst[2] = encoding[(id[1]>>1)&0x1F]
+//	dst[1] = encoding[(id[1]>>6)&0x1F|(id[0]<<2)&0x1F]
+//	dst[0] = encoding[id[0]>>3]
+//}
 
-func encode(dst, id []byte) {
-	_ = dst[19]
-	_ = id[11]
-	dst[19] = encoding[(id[11]<<4)&0x1F]
-	dst[18] = encoding[(id[11]>>1)&0x1F]
-	dst[17] = encoding[(id[11]>>6)&0x1F|(id[10]<<2)&0x1F]
-	dst[16] = encoding[id[10]>>3]
-	dst[15] = encoding[id[9]&0x1F]
-	dst[14] = encoding[(id[9]>>5)|(id[8]<<3)&0x1F]
-	dst[13] = encoding[(id[8]>>2)&0x1F]
-	dst[12] = encoding[id[8]>>7|(id[7]<<1)&0x1F]
-	dst[11] = encoding[(id[7]>>4)&0x1F|(id[6]<<4)&0x1F]
-	dst[10] = encoding[(id[6]>>1)&0x1F]
-	dst[9] = encoding[(id[6]>>6)&0x1F|(id[5]<<2)&0x1F]
-	dst[8] = encoding[id[5]>>3]
-	dst[7] = encoding[id[4]&0x1F]
-	dst[6] = encoding[id[4]>>5|(id[3]<<3)&0x1F]
-	dst[5] = encoding[(id[3]>>2)&0x1F]
-	dst[4] = encoding[id[3]>>7|(id[2]<<1)&0x1F]
-	dst[3] = encoding[(id[2]>>4)&0x1F|(id[1]<<4)&0x1F]
-	dst[2] = encoding[(id[1]>>1)&0x1F]
-	dst[1] = encoding[(id[1]>>6)&0x1F|(id[0]<<2)&0x1F]
-	dst[0] = encoding[id[0]>>3]
-}
+//func (self *Id) UnmarshalText(text []byte) error {
+//	if len(text) != stringEncodedLength {
+//		return errInvalid
+//	}
+//	for _, c := range text {
+//		if dec[c] == 0xFF {
+//			return errInvalid
+//		}
+//	}
+//	decode(self, text)
+//	return nil
+//}
+//
+//func (self *Id) UnmarshalJSON(b []byte) error {
+//	s := string(b)
+//	if s == "null" {
+//		*self = nilId
+//		return nil
+//	}
+//	return self.UnmarshalText(b[1 : len(b)-1])
+//}
 
-func (self *Id) UnmarshalText(text []byte) error {
-	if len(text) != stringEncodedLength {
-		return errInvalid
-	}
-	for _, c := range text {
-		if dec[c] == 0xFF {
-			return errInvalid
-		}
-	}
-	decode(self, text)
-	return nil
-}
-
-func (self *Id) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	if s == "null" {
-		*self = nilId
-		return nil
-	}
-	return self.UnmarshalText(b[1 : len(b)-1])
-}
-
-func decode(id *Id, src []byte) {
-	_ = src[19]
-	_ = id[11]
-
-	id[11] = dec[src[17]]<<6 | dec[src[18]]<<1 | dec[src[19]]>>4
-	id[10] = dec[src[16]]<<3 | dec[src[17]]>>2
-	id[9] = dec[src[14]]<<5 | dec[src[15]]
-	id[8] = dec[src[12]]<<7 | dec[src[13]]<<2 | dec[src[14]]>>3
-	id[7] = dec[src[11]]<<4 | dec[src[12]]>>1
-	id[6] = dec[src[9]]<<6 | dec[src[10]]<<1 | dec[src[11]]>>4
-	id[5] = dec[src[8]]<<3 | dec[src[9]]>>2
-	id[4] = dec[src[6]]<<5 | dec[src[7]]
-	id[3] = dec[src[4]]<<7 | dec[src[5]]<<2 | dec[src[6]]>>3
-	id[2] = dec[src[3]]<<4 | dec[src[4]]>>1
-	id[1] = dec[src[1]]<<6 | dec[src[2]]<<1 | dec[src[3]]>>4
-	id[0] = dec[src[0]]<<3 | dec[src[1]]>>2
-}
+//func decode(id *Id, src []byte) {
+//	_ = src[19]
+//	_ = id[11]
+//
+//	id[11] = dec[src[17]]<<6 | dec[src[18]]<<1 | dec[src[19]]>>4
+//	id[10] = dec[src[16]]<<3 | dec[src[17]]>>2
+//	id[9] = dec[src[14]]<<5 | dec[src[15]]
+//	id[8] = dec[src[12]]<<7 | dec[src[13]]<<2 | dec[src[14]]>>3
+//	id[7] = dec[src[11]]<<4 | dec[src[12]]>>1
+//	id[6] = dec[src[9]]<<6 | dec[src[10]]<<1 | dec[src[11]]>>4
+//	id[5] = dec[src[8]]<<3 | dec[src[9]]>>2
+//	id[4] = dec[src[6]]<<5 | dec[src[7]]
+//	id[3] = dec[src[4]]<<7 | dec[src[5]]<<2 | dec[src[6]]>>3
+//	id[2] = dec[src[3]]<<4 | dec[src[4]]>>1
+//	id[1] = dec[src[1]]<<6 | dec[src[2]]<<1 | dec[src[3]]>>4
+//	id[0] = dec[src[0]]<<3 | dec[src[1]]>>2
+//}
 
 func (self Id) Time() time.Time {
 	secs := int64(binary.BigEndian.Uint32(self[0:4]))
@@ -264,54 +296,54 @@ func (self Id) Pid() uint16 {
 	return binary.BigEndian.Uint16(self[7:9])
 }
 
-func (self Id) Nonce() int32 {
-	b := self[9:12]
-	return int32(uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2]))
-}
-
-func (self Id) Value() (driver.Value, error) {
-	if self.IsNil() {
-		return nil, nil
-	}
-	b, err := self.MarshalText()
-	return string(b), err
-}
-
-func (self *Id) Scan(value interface{}) (err error) {
-	switch val := value.(type) {
-	case string:
-		return self.UnmarshalText([]byte(val))
-	case []byte:
-		return self.UnmarshalText(val)
-	case nil:
-		*self = nilId
-		return nil
-	default:
-		return fmt.Errorf(errScanning, value)
-	}
-}
-
-func (self Id) IsNil() bool {
-	return self == nilId
-}
-
-func NilId() Id {
-	return nilId
-}
+//func (self Id) Nonce() int32 {
+//	b := self[9:12]
+//	return int32(uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2]))
+//}
+//
+//func (self Id) Value() (driver.Value, error) {
+//	if self.IsNil() {
+//		return nil, nil
+//	}
+//	b, err := self.MarshalText()
+//	return string(b), err
+//}
+//
+//func (self *Id) Scan(value interface{}) (err error) {
+//	switch val := value.(type) {
+//	case string:
+//		return self.UnmarshalText([]byte(val))
+//	case []byte:
+//		return self.UnmarshalText(val)
+//	case nil:
+//		*self = nilId
+//		return nil
+//	default:
+//		return fmt.Errorf(errScanning, value)
+//	}
+//}
+//
+//func (self Id) IsNil() bool {
+//	return self == nilId
+//}
+//
+//func NilId() Id {
+//	return nilId
+//}
 
 func (self Id) Bytes() []byte {
 	return self[:]
 }
 
-func FromBytes(b []byte) (Id, error) {
-	var id Id
-	if len(b) != binaryRawLength {
-		return id, errInvalid
-	}
-	copy(id[:], b)
-	return id, nil
-}
-
-func (self Id) Compare(other Id) int {
-	return bytes.Compare(self[:], other[:])
-}
+//func FromBytes(b []byte) (Id, error) {
+//	var id Id
+//	if len(b) != binaryRawLength {
+//		return id, errInvalid
+//	}
+//	copy(id[:], b)
+//	return id, nil
+//}
+//
+//func (self Id) Compare(other Id) int {
+//	return bytes.Compare(self[:], other[:])
+//}
