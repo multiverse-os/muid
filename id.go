@@ -15,41 +15,70 @@ import (
 	"unsafe"
 )
 
+// TODO: This is a combination of xid and a few other id projects. I'm trying to
+//       refactor the code and merge in more featuers so it will support
+//       bsonid and other missing functionality. because the included bsonid 
+//       library is written well in some ways and insane in others. 
+//       so i want to clean it up and have an actually well written, easy to
+//       userderstand, easy to modify, improve, update, and use. 
+//       because yes, in its current state its nearly none of that.
+//       but it does function.
+
 // TODO: Expand into a struct store the encoding, lengths, and build based on
 // these variables. These are default to current setings and are overriden by
 // chainable settings as in resulting in an API that looks like:
 //
 //     id.New().Encoding(id.Base58).Length(10).String()
 //
+//  ewww
+//  more like
+// 
+//     id.Base58().Length(10).String() 
+//
+// for reals right?
+
+
+const binaryRawLength     = 12
+
 type Id [binaryRawLength]byte
 
 // Errors
-var (
-	errInvalid  = fmt.Errorf("id: invalid Id")
-	errRandom   = fmt.Sprintf("id: cannot generate random number:")
-	errScanning = fmt.Sprintf("id: scanning unsupported type:")
-)
 
 // TODO: Should have few more options beyond 32 to extend use to more broad
 // usecases. This also should be using the newly build encoding.go file rather
 // than this encodnig const string. 
+// Id rather not use this memory, id rather just create the object early on and
+// fill in these variables so the info remains in the binary not the memory :O 
+
 const (
 	stringEncodedLength = 20
-	binaryRawLength     = 12
+  // TODO: Built out the ecoding.go file to replace the need for this and expand
+  // beyond base32 (which this is and wasnt properly labled such) 
 	encoding            = "0123456789abcdefghijklmnopqrstuv"
 )
 
+// I kinda hate this, if we keep it like this nd not just assinged in the
+// function or init then we use memory and binary space instead of just binary
+// space 
 var (
 	objectIdNonce    = randomInt32()
 	threeRandomBytes = randomBytes(3)
+  // TODO: One thing xid did really really well is this. Using the pid as the
+  // unique machine random seed. It is a brilliant solution because it gives a
+  // great seed that is typically protected regularly changing and cost very
+  // little overhead. 
 	pid              = os.Getpid()
+  // TODO: This is totally uncessary 
 	nilId            Id
+  // TODO: Really? REally? REALLY? we just need to have this space in the memory
+  // locked BECAUSE!
 	dec              [256]byte
 )
 
 func init() {
 	mathrand.Seed(time.Now().UTC().UnixNano())
-	for i := 0; i < len(dec); i++ {
+
+	for i := 0; i < 256; i++ {
 		dec[i] = 0xFF
 	}
 	for i := 0; i < len(encoding); i++ {
@@ -61,25 +90,6 @@ func init() {
 	}
 }
 
-func randomBytes(size int) []byte {
-	if size > binaryRawLength {
-		size = binaryRawLength
-	}
-	b := make([]byte, size)
-	r := rand.Reader
-	if _, err := io.ReadFull(r, b); err != nil {
-		panic(fmt.Errorf(errRandom, err))
-	}
-	return b
-}
-
-func randomInt32() uint32 {
-	b := make([]byte, 3)
-	if _, err := rand.Reader.Read(b); err != nil {
-		panic(fmt.Errorf(errRandom, err))
-	}
-	return uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2])
-}
 
 func New() Id {
 	return NewWithTime(time.Now())
@@ -89,6 +99,27 @@ func New() Id {
 //	return self
 //}
 
+// TODO: This is it, everything else at the moment is auxillary or doesnt work.
+//       1) So comment everything else out execpt those specificlaly using this
+//          system or functions needed by this. 
+//       2) refactor this function and remove the excess functions, refer to the 
+//          bson id version included for hints on how to do this
+//       3) then reimplement each of the commented functions from step 1, 
+//          or decide if they can be removed. Change the function names to be
+//          more sensical and in-line with the terms how they are used by most
+//          people because some of the function names pulled from xid are not
+//          all correct
+//       4) merge in the bson id library so that it can all be done from a
+//          single one
+//       5) Support noncing (sortability), deterministic, ultra-random (use
+//          time, pid and random) 
+//       6) Have functions that can take either the bytes or the string
+//          version of the id and convert it back into an Id object
+//       7) Short() and Prefix and similar utility functions should
+//          create a new Id object
+//       8) Have output as either bytes or string
+//       9) Easy variable length limited but a hard lower limit for security
+//      
 func NewWithTime(t time.Time) (id Id) {
 	binary.BigEndian.PutUint32(id[:], uint32(t.Unix()))
 	id[0] = byte(183)
