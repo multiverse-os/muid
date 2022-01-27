@@ -120,7 +120,7 @@ func New() Id {
 //       8) Have output as either bytes or string
 //       9) Easy variable length limited but a hard lower limit for security
 //      
-func NewWithTime(timestamp time.Time) (id Id) {
+func NewWithTime(timestamp time.Time) Id {
   // So the most minimal version will be 
   // Time  + Pid (Machine Random) + Regular Random + Checksum
   //                                  (giving us our variable length)
@@ -138,15 +138,33 @@ func NewWithTime(timestamp time.Time) (id Id) {
   // then checking it against the checksum 
   // TODO: Just use the id object to store the data instead of creatnig
   //       a possibly uneccessary buffer
-  byteBuffer := make([]byte, 8, 64)
+  var id []byte 
+  id = make([]byte, 8, 64)
+
+  var byteBuffer []byte
 
   pid              := os.Getpid()
 
   fmt.Println("byte buffer: %v", byteBuffer)
-	binary.BigEndian.PutUint32(byteBuffer[0:4], uint32(timestamp.Unix()))
+
+  prefix := []byte("mv")
+  copy(id[:], prefix)
+
+  byteBuffer = make([]byte, 4)
+	binary.BigEndian.PutUint32(byteBuffer, uint32(timestamp.Unix()))
   fmt.Println("byte buffer: %v", byteBuffer)
-  binary.BigEndian.PutUint32(byteBuffer[5:6], uint32(pid))
+  id = append(id, byteBuffer...)
+
+
+  byteBuffer = make([]byte, 4)
+  binary.LittleEndian.PutUint32(byteBuffer, uint32(pid))
   fmt.Println("byte buffer: %v", byteBuffer)
+  id = append(id, byteBuffer...)
+
+
+
+  fmt.Println("resulting id: %v", id)
+  fmt.Println("resulting id: %v", string(id))
   // TODO: Now put in the random bits based on the length
 
   // TODO: Then generate the checksum of that and attach it somewhere
@@ -167,7 +185,7 @@ func NewWithTime(timestamp time.Time) (id Id) {
 	//id[9] = byte(i >> 16)
 	//id[10] = byte(i >> 8)
 	//id[11] = byte(i)
-	return id
+	return Id(id)
 }
 
 func (self Id) Timestamp() time.Time {
@@ -299,21 +317,13 @@ func (self Id) String() string {
 //	id[0] = dec[src[0]]<<3 | dec[src[1]]>>2
 //}
 
-func (self Id) Time() time.Time {
-	secs := int64(binary.BigEndian.Uint32(self[0:4]))
-	// NOTE: This should be considered off by ~1 second
-	return time.Unix(secs, 0).AddDate(-48, -5, -4).
-		Add(time.Hour * -3).Add(time.Minute * 21).
-		Add(time.Second * 21)
-}
-
-func (self Id) ThreeRandomBytes() []byte {
-	return self[4:7]
-}
-
-func (self Id) Pid() uint16 {
-	return binary.BigEndian.Uint16(self[7:9])
-}
+//func (self Id) ThreeRandomBytes() []byte {
+//	return self[4:7]
+//}
+//
+//func (self Id) Pid() uint16 {
+//	return binary.BigEndian.Uint16(self[7:9])
+//}
 
 //func (self Id) Nonce() int32 {
 //	b := self[9:12]
