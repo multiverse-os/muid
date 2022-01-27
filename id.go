@@ -149,26 +149,40 @@ func NewWithTime(timestamp time.Time) Id {
   //   4 (time) + 3 (machine id) + 2 (process id) + 3 (nonce)
   // xid is 12 bytes
 
+  // NOTE: We theoritically could drop time down to 2 by subtracting a fixed
+  // number of years from the unix time and adding them back. Not going into
+  // detail but if one knows how unix time works they will understand how this
+  // would make sense to reliably drop the 
+
   // muid is aiming to shirk the machine id and use the time as a nonce
   // to allow for more random bits and a checksum
 
-  // 4 (time) + 3 (process id) + (1-6) + (2-4)
+
+  // IMPORTANT NOTE ******************************************************
+  // TODO (shrink the bitsize of the time) - use time.Year * 30 to get get the
+  // seconds instead of hard coding the value for cleaner code.
+  // 4 (time) + 2 (process id) + 2 (machine id) + (1-6)(random) + (2-4)(checksum)
+  //   4 time + 2 process + 2 checksum (first and last) 8
   //  even with 3 byte process id we can get and using the slim checksum
   //  we can get 3 bytes of random data which is important
   //  otherwise we can also use machine id and get 1 byte of random
 
-  //   [ look into how xid is pushing the process id down to 2 bytes 
+  // 2 time + 2 process + 2 machine + 2 random = 8 minimum.. 4 checksum gives us
+  // 12 and 2 gives us the smaller 10 byte version
+  // **Thisis the most important part of this document currently ********
+
 
   // TODO: Was already leaning towards something like this but for reference xid
   // uses: 
   // Base32 hex encoded by default (16 bytes storage when transported as printable string)
 
+
   // TODO: xid is adds so much fucking code just to get a downcased version of
   // base32. When you can just do the normal base32 and downcase it (and upcase
-  // on reverse operations)... 
+  // on reverse operations)... o.O
 
   var id []byte 
-  id = make([]byte, 12)
+  id = make([]byte, 8, 64)
 
   var byteBuffer []byte
 
@@ -176,37 +190,48 @@ func NewWithTime(timestamp time.Time) Id {
 
   fmt.Println("byte buffer: %v", byteBuffer)
 
+  // TODO: Move to separate prefix method so this is optional
   prefix := []byte("mv")
   copy(id[:], prefix)
 
   byteBuffer = make([]byte, 4)
 	binary.BigEndian.PutUint32(byteBuffer, uint32(timestamp.Unix()))
   fmt.Println("byte buffer: %v", byteBuffer)
-  id = append(id, byteBuffer...)
+  copy(id[2:], byteBuffer)
 
   // TODO: This version will give us 2 bytes of pid
 
   // NOTE: By shifting the pid to the right by 8 bytes and by doing this we
   //       but LOL just use the fucking go fuckions. look how I did it below
   //       that is actually readable by most programmers and just as effective
-  fmt.Println("pid >> 8: ", (pid >> 8))
-  fmt.Println("byte(pid >> 8): ", byte(pid >> 8))
-  id[5] = byte(pid >> 8)
+  //fmt.Println("pid >> 8: ", (pid >> 8))
+  //fmt.Println("byte(pid >> 8): ", byte(pid >> 8))
+  //id[5] = byte(pid >> 8)
 
-	id[6] = byte(pid)
-  fmt.Println("pid: ", pid)
-  fmt.Println("byte(pid): ", byte(pid))
+	//id[6] = byte(pid)
+  //fmt.Println("pid: ", pid)
+  //fmt.Println("byte(pid): ", byte(pid))
 
-  binary.BigEndian.Uint16(id[7:9])
+  //binary.BigEndian.Uint16(id[7:9])
 
 
   byteBuffer = make([]byte, 2)
   binary.LittleEndian.PutUint16(byteBuffer, uint16(pid))
   fmt.Println("byte buffer: %v", byteBuffer)
+  copy(id[6:], byteBuffer)
   //id = append(id, byteBuffer...)
 
+  // TODO: Get the machine id and convert it to binary  (only need 2 bits) 
+
+  // TODO: Get some number of random bytes
+
+  // TODO: Add checksum
+
+  // TODO: Then merge all together, then base32 + hex
+  //       then its ready to use
 
 
+   
   fmt.Println("byte slice version of id: ", id)
   fmt.Println("string version of id: ", string(id))
 
@@ -224,6 +249,9 @@ func NewWithTime(timestamp time.Time) Id {
 
   // NOTE: We could just use 2 bytes and do the checksum and only check against
   // first and last. In this way we could use sha3 and do something similar
+
+  // TODO: Add the checksum with a method to allow developer to pick which they
+  // prefer OR more importantly if they want to include it. 
   var crc32Id []byte
   crc32Id = make([]byte, 4)
   binary.BigEndian.PutUint32(crc32Id, crc32.ChecksumIEEE(id))
