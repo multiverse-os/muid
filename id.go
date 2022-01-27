@@ -195,8 +195,38 @@ func NewWithTime(timestamp time.Time) Id {
   copy(id[:], prefix)
 
   byteBuffer = make([]byte, 4)
-	binary.BigEndian.PutUint32(byteBuffer, uint32(timestamp.Unix()))
-  fmt.Println("byte buffer: %v", byteBuffer)
+
+  unixTimestamp := uint32(timestamp.Unix())
+
+  day := (time.Hour * 24)
+  year := (day * 365)
+
+  fourtyYears := (year * 40) + (10 * day) // leap days
+
+  fmt.Println("seconds in 40 years: ", fmt.Sprintf("%v", fourtyYears.Seconds()))
+
+  compressedTimestamp := unixTimestamp - uint32(fourtyYears.Seconds())
+
+  fmt.Println("compressed timestamp:", compressedTimestamp)
+
+
+  // NOTE: This originally bigEndian which is why its like that now but we
+  // experimented with using littleEndian  which is TECHNICALLY PREFERRED since
+  // it would put the nonce at the start and therefore make it much simler to
+  // sort by
+
+  // TODO: This appears to work well in poc form, we should flip the endian and
+  //       experiment using this in the id over non-compressed time, but
+  //       in the end this should be developer option
+  byteBuffer = make([]byte, 2)
+  binary.BigEndian.PutUint16(byteBuffer, uint16(compressedTimestamp))
+  fmt.Println("compressed timestamp byte buffer: %v", byteBuffer)
+  //copy(id[2:], byteBuffer)
+
+
+  byteBuffer = make([]byte, 4)
+	binary.BigEndian.PutUint32(byteBuffer, unixTimestamp)
+  fmt.Println("timestamp byte buffer: %v", byteBuffer)
   copy(id[2:], byteBuffer)
 
   // TODO: This version will give us 2 bytes of pid
@@ -221,11 +251,16 @@ func NewWithTime(timestamp time.Time) Id {
   copy(id[6:], byteBuffer)
   //id = append(id, byteBuffer...)
 
-  // TODO: Get the machine id and convert it to binary  (only need 2 bits) 
+  // TODO: Get the machine id and convert it to binary (can we get 1 byte? maybe
+  // by using the checksum and pulling first byte or hashing and first and
+  // last?)
 
-  // TODO: Get some number of random bytes
+  // TODO: Get some number of random bytes - this will help either make it work
+  // if ran in parallel on a massive amount of amchine or allow for a shorter id 
+  // format depending on size
 
-  // TODO: Add checksum
+  // TODO: Add checksum - make this optional but by default lets have a checksum
+  // since we creatively saved space elsewhere 
 
   // TODO: Then merge all together, then base32 + hex
   //       then its ready to use
