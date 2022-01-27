@@ -1,14 +1,12 @@
-package id
+package muid
 
 import (
-	"bytes"
-	"crypto/rand"
-	"database/sql/driver"
+	//"database/sql/driver"
 	"encoding/binary"
-	"fmt"
-	"hash/crc32"
-	"io"
-	mathrand "math/rand"
+	//"fmt"
+	//"hash/crc32"
+	//"io"
+	"math/rand"
 	"os"
 	"sync/atomic"
 	"time"
@@ -79,7 +77,7 @@ var (
 )
 
 func init() {
-	mathrand.Seed(time.Now().UTC().UnixNano())
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	//for i := 0; i < 256; i++ {
 	//	dec[i] = 0xFF
@@ -123,7 +121,7 @@ func New() Id {
 //       8) Have output as either bytes or string
 //       9) Easy variable length limited but a hard lower limit for security
 //      
-func NewWithTime(t time.Time) (id Id) {
+func NewWithTime(timestamp time.Time) (id Id) {
   // So the most minimal version will be 
   // Time  + Pid (Machine Random) + Regular Random + Checksum
   //                                  (giving us our variable length)
@@ -139,22 +137,32 @@ func NewWithTime(t time.Time) (id Id) {
   // technically it could be in the middle but you would ahve to do a 
   // weird process of extracting it and combining the first and half portions
   // then checking it against the checksum 
+  // TODO: Just use the id object to store the data instead of creatnig
+  //       a possibly uneccessary buffer
+	var byteBuffer []byte
 
-	binary.BigEndian.PutUint32(b[0:4], uint32(timestamp.Unix()))
+	binary.BigEndian.PutUint32(byteBuffer[0:4], uint32(timestamp.Unix()))
+  binary.BigEndian.PutUint32(byteBuffer[5:6], uint32(pid))
+  // TODO: Now put in the random bits based on the length
+
+  // TODO: Then generate the checksum of that and attach it somewhere
+
+  // TODO: Then output the newly generated id
+
   //oiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii so easy!
 
-	binary.BigEndian.PutUint32(id[:], uint32(t.Unix()))
-	id[0] = byte(183)
-	id[1] = byte(192)
-	id[4] = threeRandomBytes[0]
-	id[5] = threeRandomBytes[1]
-	id[6] = threeRandomBytes[2]
-	id[7] = byte(pid >> 8)
-	id[8] = byte(pid)
-	i := atomic.AddUint32(&objectIdNonce, 1)
-	id[9] = byte(i >> 16)
-	id[10] = byte(i >> 8)
-	id[11] = byte(i)
+	//binary.BigEndian.PutUint32(id[:], uint32(t.Unix()))
+	//id[0] = byte(183)
+	//id[1] = byte(192)
+	//id[4] = threeRandomBytes[0]
+	//id[5] = threeRandomBytes[1]
+	//id[6] = threeRandomBytes[2]
+	//id[7] = byte(pid >> 8)
+	//id[8] = byte(pid)
+	//i := atomic.AddUint32(&objectIdNonce, 1)
+	//id[9] = byte(i >> 16)
+	//id[10] = byte(i >> 8)
+	//id[11] = byte(i)
 	return id
 }
 
@@ -344,6 +352,3 @@ func (self Id) Bytes() []byte {
 //	return id, nil
 //}
 //
-//func (self Id) Compare(other Id) int {
-//	return bytes.Compare(self[:], other[:])
-//}

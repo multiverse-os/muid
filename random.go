@@ -2,7 +2,7 @@ package muid
 
 import (
   "io"
-  "math/rand"
+  "crypto/rand"
 )
 
 // TODO: Length should be variable
@@ -17,7 +17,7 @@ func RandomBytes(size int) []byte {
 	byteBuffer := make([]byte, size)
 	randReader := rand.Reader
 	if _, err := io.ReadFull(randReader, byteBuffer); err != nil {
-		panic(fmt.Errorf(errRandom, err))
+		panic(err)
 	}
 	return byteBuffer
 }
@@ -25,7 +25,7 @@ func RandomBytes(size int) []byte {
 func RandomInt32() uint32 {
 	byteBuffer := make([]byte, 3)
 	if _, err := rand.Reader.Read(byteBuffer); err != nil {
-		panic(fmt.Errorf(errRandom, err))
+		panic(err)
 	}
 	return uint32(byteBuffer[0])<<16 | uint32(byteBuffer[1])<<8 | uint32(byteBuffer[2])
 }

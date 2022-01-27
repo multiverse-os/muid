@@ -1,4 +1,4 @@
-package id
+package muid
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ const (
 	Base32
 	Base58
 	Numeric
-	URL
+	URLSafe
 )
 
 func (self Encoding) Encoding() string {

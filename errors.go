@@ -1,7 +1,11 @@
 package muid
 
+import (
+  "errors"
+)
+
 var (
-	errInvalid  = fmt.Errorf("id: invalid Id")
-	errRandom   = fmt.Sprintf("id: cannot generate random number:")
-	errScanning = fmt.Sprintf("id: scanning unsupported type:")
+	errInvalid  = errors.New("id: invalid Id")
+	errRandom   = errors.New("id: cannot generate random number:")
+	errScanning = errors.New("id: scanning unsupported type:")
 )
