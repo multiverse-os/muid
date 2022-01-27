@@ -3,14 +3,14 @@ package muid
 import (
 	//"database/sql/driver"
 	"encoding/binary"
-	//"fmt"
+	"fmt"
 	//"hash/crc32"
 	//"io"
 	"math/rand"
 	"os"
-	"sync/atomic"
+	//"sync/atomic"
 	"time"
-	"unsafe"
+	//"unsafe"
 )
 
 // TODO: This is a combination of xid and a few other id projects. I'm trying to
@@ -50,25 +50,24 @@ type Id []byte
 // Id rather not use this memory, id rather just create the object early on and
 // fill in these variables so the info remains in the binary not the memory :O 
 
-const (
-	stringEncodedLength = 20
-  // TODO: Built out the ecoding.go file to replace the need for this and expand
-  // beyond base32 (which this is and wasnt properly labled such) 
-	encoding            = "0123456789abcdefghijklmnopqrstuv"
-)
+//const (
+//	stringEncodedLength = 20
+//  // TODO: Built out the ecoding.go file to replace the need for this and expand
+//  // beyond base32 (which this is and wasnt properly labled such) 
+//)
 
 // I kinda hate this, if we keep it like this nd not just assinged in the
 // function or init then we use memory and binary space instead of just binary
 // space 
 var (
   // a real nonce needs to increment up always
-	objectIdNonce    = randomInt32()
-	threeRandomBytes = randomBytes(3)
+	// objectIdNonce    = randomInt32()
+	// threeRandomBytes = randomBytes(3)
   // TODO: One thing xid did really really well is this. Using the pid as the
   // unique machine random seed. It is a brilliant solution because it gives a
   // great seed that is typically protected regularly changing and cost very
   // little overhead. 
-	pid              = os.Getpid()
+	//pid              = os.Getpid()
   // TODO: This is totally uncessary 
 	//nilId            Id
   // TODO: Really? REally? REALLY? we just need to have this space in the memory
@@ -139,10 +138,15 @@ func NewWithTime(timestamp time.Time) (id Id) {
   // then checking it against the checksum 
   // TODO: Just use the id object to store the data instead of creatnig
   //       a possibly uneccessary buffer
-	var byteBuffer []byte
+  byteBuffer := make([]byte, 8, 64)
 
+  pid              := os.Getpid()
+
+  fmt.Println("byte buffer: %v", byteBuffer)
 	binary.BigEndian.PutUint32(byteBuffer[0:4], uint32(timestamp.Unix()))
+  fmt.Println("byte buffer: %v", byteBuffer)
   binary.BigEndian.PutUint32(byteBuffer[5:6], uint32(pid))
+  fmt.Println("byte buffer: %v", byteBuffer)
   // TODO: Now put in the random bits based on the length
 
   // TODO: Then generate the checksum of that and attach it somewhere
@@ -166,12 +170,18 @@ func NewWithTime(timestamp time.Time) (id Id) {
 	return id
 }
 
+func (self Id) Timestamp() time.Time {
+	unixTime := binary.BigEndian.Uint32(self[0:4])
+	return time.Unix(int64(unixTime), 0).UTC()
+}
+
 // TODO: This should be marshal actually bc now it imples it generates an Id
 // from a string deterministically
-func FromString(id string) (Id, error) {
-	i := &Id{}
-	err := i.UnmarshalText([]byte(id))
-	return *i, err
+func FromString(seed string) (id Id, err error) {
+	//i := &Id{}
+	//err := i.UnmarshalText([]byte(seed))
+	//return *i, err
+  return id, err
 }
 
 //func MarshalId(idString string) (id Id, err error) {
@@ -179,9 +189,10 @@ func FromString(id string) (Id, error) {
 //}
 
 func (self Id) String() string {
-	text := make([]byte, stringEncodedLength)
-	encode(text, self[:])
-	return *(*string)(unsafe.Pointer(&text))
+	//text := make([]byte, stringEncodedLength)
+	//encode(text, self[:])
+	//return *(*string)(unsafe.Pointer(&text))
+  return ""
 }
 
 //func (self Id) NoPrefix() string {
@@ -339,9 +350,6 @@ func (self Id) Pid() uint16 {
 //	return nilId
 //}
 
-func (self Id) Bytes() []byte {
-	return self[:]
-}
 
 //func FromBytes(b []byte) (Id, error) {
 //	var id Id
@@ -352,3 +360,4 @@ func (self Id) Bytes() []byte {
 //	return id, nil
 //}
 //
+
