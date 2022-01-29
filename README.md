@@ -86,6 +86,13 @@ fmt.Println("custom encoder:", base32Id)
 version of time, but the decision to use the 2 byte or 4 byte version is left
 to the developers using the library. 
 
+Provides the ability to either create deterministic id keys, or conceal
+the id system or the details within the key. Using SHA3 Shake256's 
+unique ability to create variable left tokens from any size message. 
+Ensuring our keys are any desired byte or string length. The library is also
+built so that it is easy to extend this hashing functionality by adding any
+number of hashing algorithms. 
+
 Ability to add a checksum, both a 1 byte and 4 byte version. Checksums are
 supplied by either crc32 or adler32, and additionally an ultra simple an
 version requiring a single byte by simply adding byte values and dividing 

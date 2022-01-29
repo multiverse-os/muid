@@ -19,6 +19,21 @@ func NilId() Id { return Id{} }
 
 func Generate() Id { return AtTime(time.Now()) }
 
+func Deterministic(seed string, length int) Id {
+
+
+  if length < len(seed) {
+    length = len(seed)
+  }
+  id := make([]byte, length)
+  copy(id[0:], prefixBytes(seed))
+  if len(seed) < length {
+    randomByteLength := length - len(seed)
+    copy(id[len(seed):], randomBytes(randomByteLength))
+  }
+  return Id(id)
+}
+
 func AtTime(timestamp time.Time) Id {
   id := make([]byte, 12)
   copy(id[0:], timestampBytes(timestamp))
