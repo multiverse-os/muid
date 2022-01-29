@@ -5,9 +5,6 @@ import (
   "encoding/binary"
 )
 
-// TODO: Need to add a method of Id to optionally use either full or compressed
-//       version of the timestamp to support a wider number of use-cases 
-
 // NOTE: Amount of time is not really important, just consistency 
 //       (value is based on 8760 hours per year)
 func fourtyYears() time.Duration {
@@ -37,9 +34,8 @@ func timestampBytes(timestamp time.Time) []byte {
   return byteBuffer
 }
 
-// TODO: This has to be updated using our compress and uncompress timestamp
-// functions
-//func (self Id) Timestamp() time.Time {
-//	unixTime := binary.BigEndian.Uint32(self[0:4])
-//	return time.Unix(int64(unixTime), 0).UTC()
-//}
+// TODO: Need to detect if it fails and retry with compressed version
+func (self Id) Timestamp() time.Time {
+	unixTime := binary.BigEndian.Uint32(self[0:4])
+	return time.Unix(int64(unixTime), 0).UTC()
+}

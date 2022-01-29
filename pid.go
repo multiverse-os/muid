@@ -5,10 +5,7 @@ import (
   "os"
 )
 
-// TODO: Rewrite this, to match our positioning
-//func (self Id) Pid() uint16 {
-//	return binary.BigEndian.Uint16(self[7:9])
-//}
+func (self Id) Pid() uint16 { return binary.BigEndian.Uint16(self[4:5]) }
 
 func pidBytes() []byte {
   byteBuffer := make([]byte, 2)

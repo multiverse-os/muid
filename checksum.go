@@ -1,12 +1,13 @@
 package muid
 
 import (
+  "bytes"
   "encoding/binary"
 	"hash/crc32"
   "hash/adler32"
 )
 
-func simpleChecksumByte(idBytes []byte) byte {
+func checksumByte(idBytes []byte) byte {
   var sum uint8
   for _, idByte := range idBytes {
     sum += uint8(idByte)
@@ -14,8 +15,8 @@ func simpleChecksumByte(idBytes []byte) byte {
   return byte(sum / uint8(len(idBytes)))
 }
 
-func simpleChecksumValid(idBytes []byte, checksumByte byte) bool {
-  return simpleChecksumByte(idBytes) == checksumByte
+func checksumValid(idBytes []byte, checkByte byte) bool {
+  return checksumByte(idBytes) == checkByte
 }
 
 func crc32ChecksumBytes(id Id) []byte {
@@ -25,7 +26,7 @@ func crc32ChecksumBytes(id Id) []byte {
 }
 
 func crc32ChecksumValid(id Id, checksumBytes []byte) bool {
-  return crc32ChecksumBytes(id) == checksumBytes
+  return bytes.Compare(crc32ChecksumBytes(id), checksumBytes) == 0
 }
 
 func adler32ChecksumBytes(id Id) []byte {
@@ -35,5 +36,5 @@ func adler32ChecksumBytes(id Id) []byte {
 }
 
 func adler32ChecksumValid(id Id, checksumBytes []byte) bool {
-  return adler32ChecksumBytes(id) == checksumBytes
+  return bytes.Compare(adler32ChecksumBytes(id), checksumBytes) == 0
 }
