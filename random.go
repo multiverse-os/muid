@@ -1,31 +1,20 @@
 package muid
 
 import (
-  "io"
   "crypto/rand"
 )
 
-// TODO: Length should be variable
-const (
-  binaryRawLength     = 12
-)
-
-func RandomBytes(size int) []byte {
-	if binaryRawLength < size {
-		size = binaryRawLength
-	}
-	byteBuffer := make([]byte, size)
-	randReader := rand.Reader
-	if _, err := io.ReadFull(randReader, byteBuffer); err != nil {
-		panic(err)
-	}
-	return byteBuffer
+func RandomByte() byte {
+	return byte(rand.Uint8())
 }
 
-func RandomInt32() uint32 {
-	byteBuffer := make([]byte, 3)
-	if _, err := rand.Reader.Read(byteBuffer); err != nil {
-		panic(err)
-	}
-	return uint32(byteBuffer[0])<<16 | uint32(byteBuffer[1])<<8 | uint32(byteBuffer[2])
+func RandomBytes(length uint8) (randomBytes []byte) {
+  for index := 0; index < length; index++ {
+    randomBytes = append(randomBytes, RandomByte())
+  }
+  return randomBytes
+}
+
+func RandomUint32() uint32 {
+  return rand.Uint32()
 }
