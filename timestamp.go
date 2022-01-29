@@ -25,9 +25,6 @@ func uncompressTimestamp(compressedTimestamp uint16) time.Time {
   ).UTC()
 }
 
-// TODO: This appears to work well in poc form, we should flip the endian and
-//       experiment using this in the id over non-compressed time, but
-//       in the end this should be developer option
 func compressedTimestampBytes(timestamp time.Time) []byte {
   byteBuffer := make([]byte, 2)
   binary.BigEndian.PutUint16(byteBuffer, compressTimestamp(timestamp))

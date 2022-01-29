@@ -53,14 +53,18 @@ func (self Id) Prefix(prefix string) Id {
 }
 
 func NewWithTime(timestamp time.Time) Id {
-  var id []byte 
-  id = make([]byte, 8, 64)
+  id := make([]byte, 6, 64)
 
   copy(id[0:4], timestampBytes(timestamp))
+  fmt.Println("id bytes: ", id)
   copy(id[5:6], pidBytes())
+  fmt.Println("id bytes: ", id)
   // TODO copy(id[7:8], machineBytes())
   // TODO copy(id[9:10], checksumBytes())
   // TODO copy(id[8:], randomBytes(length))
+
+  machineBytes := machineIdBytes(3)
+  fmt.Println("machine bytes (3): ", machineBytes)
 
   // TODO: Then merge all together, then base32 + hex
   //       then its ready to use

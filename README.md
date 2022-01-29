@@ -41,14 +41,17 @@ to the developers using the library.
 Ability to add a checksum, both a 2 byte and 4 byte version. 
 
 ```
-  2..4 Bytes  + 2 Bytes   + 2 Bytes + 0..N Bytes + 2..4 Bytes
-  (Timestamp)  (MachineID)    (PID)    (Random)    (Checksum)
+  2..4 Bytes  + 2..3 Bytes  + 2 Bytes + 0..N Bytes + 2..4 Bytes
+  (Timestamp)  (MachineID)     (PID)     (Random)    (Checksum)
 ```
 
 The resulting `muid` is minimum 8 bytes, default is 10 bytes, and can be as 
 large as 32 bytes. Providing additional functionality over existing libraries, 
 with far less resource usage, overhead and can approach 0% probability of 
 collision. 
+
+Machine ID is 2 bytes of the `crc32` checksum pulled from the system, otherwise
+it falls back on random bytes which is perfectly fine for almost all use cases. 
 
 The resulting Base32/Hex string (default, but this is customizable) is 14 bytes. 
 
