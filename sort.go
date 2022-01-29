@@ -16,6 +16,8 @@ func (self sorter) Swap(i, j int) { self[i], self[j] = self[j], self[i] }
 
 func Sort(ids []Id) { sort.Sort(sorter(ids)) }
 
+// TODO: Would be best to probably just compare the time portion of the ID,
+// likely less resources, and faster which is important for sorting. 
 func (self Id) Compare(other Id) int {
 	return bytes.Compare(self[:], other[:])
 }

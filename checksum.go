@@ -4,7 +4,6 @@ import (
   "encoding/binary"
 	"hash/crc32"
   "hash/adler32"
-  "fmt"
 )
 
 // NOTE: Because we use time, the values can never be all zero,
@@ -13,9 +12,6 @@ func simpleChecksumByte(idBytes []byte) byte {
   var sum uint8
   for _, idByte := range idBytes {
     sum += uint8(idByte)
-    fmt.Println("idByte:", idByte)
-    fmt.Println("uint8(idByte):", uint8(idByte))
-    fmt.Println("sum: ", sum)
   }
   return byte(sum / uint8(len(idBytes)))
 }
