@@ -48,22 +48,28 @@ type Id []byte
 
 func init() { rand.Seed(time.Now().UTC().UnixNano()) }
 
-func (self Id) IsNil() bool { return self == nil }
+func (self Id) IsNil() bool { return (self == nil || len(self) == 0) }
+// TODO: Use the checksum if it exists and check not nil and not below minimum size or over maximum
+func (self Id) IsValid() bool { return true } 
 
 func NilId() Id { return Id{} }
 func New() Id { return NewWithTime(time.Now()) }
 
 // TODO: Add chainable methods like this for customizing the id 
 func (self Id) Prefix(prefix string) Id {
+  return self
 }
 
-func prefixBytes(prefix string) []byte { return []byte(prefix) }
 
 func NewWithTime(timestamp time.Time) Id {
   var id []byte 
   id = make([]byte, 8, 64)
 
-  copy(id[6:], pidBytes())
+  copy(id[0:4], timestampBytes())
+  copy(id[5:6], pidBytes())
+  // TODO copy(id[7:8], machineBytes())
+  // TODO copy(id[8:], randomBytes(length))
+  // TODO copy(
 
 
 
@@ -79,10 +85,9 @@ func NewWithTime(timestamp time.Time) Id {
   //       then its ready to use
 
 
-   
-  fmt.Println("byte slice version of id: ", id)
-  fmt.Println("string version of id: ", string(id))
-
+  // TODO: The output string will be based on a chainable but these need to go
+  // into encoding so we can simplify the chainable by calling internal
+  // functions 
   hexId := hex.EncodeToString(id)
   fmt.Println("hex version of id: ", hexId)
   fmt.Println("byte slice version of hex id: ", []byte(hexId))
@@ -95,13 +100,6 @@ func NewWithTime(timestamp time.Time) Id {
   fmt.Println("base32 version of id: ", base32Id)
   fmt.Println("byte slice version of base32 id: ", []byte(base32Id))
 
-  // NOTE: We could just use 2 bytes and do the checksum and only check against
-  // first and last. In this way we could use sha3 and do something similar
-
-  // TODO: Add the checksum with a method to allow developer to pick which they
-  // prefer OR more importantly if they want to include it. 
-
-
   // TODO: The resulting id MUST
   //         * be easily converted to a string that is base32 or base58 or base64
   //           or at least URL safe
@@ -112,10 +110,6 @@ func NewWithTime(timestamp time.Time) Id {
 
 
   // TODO: Now put in the random bits based on the length
-
-  // TODO: Then generate the checksum of that and attach it somewhere
-
-  // TODO: Then output the newly generated id
 
 	return Id(id)
 }
@@ -129,70 +123,11 @@ func FromString(seed string) (id Id, err error) {
   return id, err
 }
 
-//func MarshalId(idString string) (id Id, err error) {
-//  return id, err
-//}
-
-//func (self Id) Short() string {
-//	text := make([]byte, stringEncodedLength)
-//	encode(text, self[:])
-//	return string([]rune(*(*string)(unsafe.Pointer(&text)))[10:20])
-//}
-
-// TODO: Marshal text should not be a method of the object, it should take in
-// bytes and return the Id. So either this is mis-named or it is improperly
-// implemented
-//func (self Id) MarshalText() ([]byte, error) {
-//	text := make([]byte, stringEncodedLength)
-//	encode(text, self[:])
-//	return text, nil
-//}
+// NOTE: Removing all excess code, we have divered so far that their misnamed
+// marshal functions are unlikely to relevant and at the very least could be
+// better written so we will glance over xid and ensure we did not lose any
+// functionality. 
 //
-
-//func (self *Id) UnmarshalText(text []byte) error {
-//	if len(text) != stringEncodedLength {
-//		return errInvalid
-//	}
-//	for _, c := range text {
-//		if dec[c] == 0xFF {
-//			return errInvalid
-//		}
-//	}
-//	decode(self, text)
-//	return nil
-//}
-//
-
-//func (self Id) ThreeRandomBytes() []byte {
-//	return self[4:7]
-//}
-//
-
-//func (self *Id) Scan(value interface{}) (err error) {
-//	switch val := value.(type) {
-//	case string:
-//		return self.UnmarshalText([]byte(val))
-//	case []byte:
-//		return self.UnmarshalText(val)
-//	case nil:
-//		*self = nilId
-//		return nil
-//	default:
-//		return fmt.Errorf(errScanning, value)
-//	}
-//}
-
-
-//func FromBytes(b []byte) (Id, error) {
-//	var id Id
-//	if len(b) != binaryRawLength {
-//		return id, errInvalid
-//	}
-//	copy(id[:], b)
-//	return id, nil
-//}
-//
-
-
-
-
+// Our goal is less code, cleaner, easier-to-understand, less memory, more
+// functionality, and smaller or highly customizable ids for the widest
+// number of usecases. 

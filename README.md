@@ -3,29 +3,71 @@
 ## Multiverse: `muid` **M**ultiversal *(Unique)* **Id**
 **URL** [multiverse-os.org](https://multiverse-os.org)
 
-Multiversal unique ID, or `muid` (or `mid`), is a time sortable base32 ids
-library. `mid` is small and simple Go library with no dependencies with plans to
-extend the functionality for an even more general-use id library. 
+Multiversal Unique ID, or `muid` (or `mid`), is an ultra lightweight id library,
+similar to `snowflake` or `xid`. Producing ids using a variety of techniques to
+build 8 to 12 byte identification that is time sortable and avoid collision. 
 
-**This API and protocol is not static, major changes are planned or possibly an
-entire rewrite. This may just be the first iteration to experiment with early
-concepts. But it does still function as a basic simple time encoded, sorting,
-base32 id library, and can be used reliabily if forked, but this specific
-library will be in flux until alpha version is released.**
+The library is built so that developers can customize their generated ids with
+enough resolution to reproduce MongoDB `bsonid` using a methodology which
+improves upon the existing go `bsonid` library. 
 
-Ideally we will include mnemonic output, emoji, several other popular base-X and
-give greater control over length. This should be paired with scramble keys and
-basic database tools for Multiverse.
+The library is designed to easily be customizable, use less memory than
+alternatives, less over-head, while acheiving the same results or even better
+using some unique techniques to shrink the byte size of the resulting ids. 
 
-#### Development
+The resulting Ids can easily be converted to Hex, Bytes, Base32, URL-Safe and 
+other encoding types.
 
-Support for a variety of encodings including: `alphabetical`, `alphanumeric`,
-`numeric`, `base32`, `base36`, `base58`, `base64`, and `URL-safe` encodings (and
-custom definitions with variable-length support for short-ids, slugs, or
-database indexes. In addition, add the ability to index ids by a developer
-specified value. Resulting in a generic, broad-scope, multi-use id library for
-the variety of needs for the variety of requirements of the Multiverse software
-collection. 
+Additionally some 2-way hash functions to hide the source id system while still 
+providing developers a way to access all the unique features provided by `muid`.
+
+While the original inspiration comes from `bsonid` and `xid`, these libraries 
+both use more resources, produce bigger ids, and their code does make use of the
+standard libraries making them hard for some developers to understand and more
+importantly hard for some developers to moidfy, customize, or contribute to. 
+
+`muid` like almost all Multiverse libraries uses no external dependencies, are
+written in pure Go, using only the standard libraries. Making code review,
+easier and resulting code footprint smaller. 
+
+#### Features
+`muid` utilizes a unique solution for a compressed (2 byte instead of 4 byte ) 
+version of time, but the decision to use the 2 byte or 4 byte version is left
+to the developers using the library. 
+
+Ability to add a checksum, both a 2 byte and 4 byte version. 
+
+```
+  2..4 Bytes  + 2 Bytes   + 2 Bytes + 0..N Bytes + 2..4 Bytes
+  (Timestamp)  (MachineID)    (PID)    (Random)    (Checksum)
+```
+
+The resulting `muid` is minimum 8 bytes, default is 10 bytes, and can be as 
+large as 32 bytes. Providing additional functionality over existing libraries, 
+with far less resource usage, overhead and can approach 0% probability of 
+collision. 
+
+The resulting Base32/Hex string (default, but this is customizable) is 14 bytes. 
+
+xid is 12 bytes, and snowflake is >12 but both use more resources and have less
+fucntionality. 
+
+**A basic deterministic ID system based on a given seed is also planned.**
+
+#### Commands
+Included with the project are example commands, but also a generic command which
+can produce ids so that it can easily be used with scripting languages. 
+
+### Development
+Development is specifically for the Multiverse project but all of our projects
+are open to the public, we accept pull requests, and requests for features that
+go beyond the scope of our needs as long as the features could reasonably be
+used by other developers and do not increase the code footprint too
+significiantly. 
+
+The goal is to create libraries for use within the Multiverse project but also
+for use by the wider Go developer community which is why we make effort to avoid
+any external dependencies.
 
 
 
