@@ -4,15 +4,21 @@ import (
   "encoding/binary"
 	"hash/crc32"
   "hash/adler32"
+  "fmt"
 )
 
-// TODO: It will be necessary to add in the code for a compressed
-//       version of the checksum, like using first and last 
-//       In addition we will need to reverse functions for 
-//       taking a Id and validating the checksum. Support should
-//       exist for both short and full versions of checksums
-//       to give developers more options and expand our number
-//       of potential use cases. 
+// NOTE: Because we use time, the values can never be all zero,
+//       so this method will work reliably. 
+func simpleChecksumByte(idBytes []byte) byte {
+  var sum uint8
+  for _, idByte := range idBytes {
+    sum += uint8(idByte)
+    fmt.Println("idByte:", idByte)
+    fmt.Println("uint8(idByte):", uint8(idByte))
+    fmt.Println("sum: ", sum)
+  }
+  return byte(sum / uint8(len(idBytes)))
+}
 
 func crc32ChecksumBytes(id Id) []byte {
   byteBuffer := make([]byte, 4)

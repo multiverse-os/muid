@@ -45,26 +45,31 @@ func init() { rand.Seed(time.Now().UTC().UnixNano()) }
 func NilId() Id { return Id{} }
 func New() Id { return NewWithTime(time.Now()) }
 
-
-
 // TODO: Add chainable methods like this for customizing the id 
 func (self Id) Prefix(prefix string) Id {
   return self
 }
 
+// TODO: For now lets just do full size and we can make .Short() use our
+// compressed values
 func NewWithTime(timestamp time.Time) Id {
-  id := make([]byte, 6, 64)
-
-  copy(id[0:4], timestampBytes(timestamp))
+  id := make([]byte, 12)
+  copy(id[0:], timestampBytes(timestamp))
   fmt.Println("id bytes: ", id)
-  copy(id[5:6], pidBytes())
+  copy(id[4:], pidBytes())
   fmt.Println("id bytes: ", id)
-  // TODO copy(id[7:8], machineBytes())
+  copy(id[6:], machineIdBytes(3))
+  fmt.Println("id bytes: ", id)
+  rBytes := randomBytes(2)
+  fmt.Println("rBytes:", rBytes)
+  copy(id[9:], randomBytes(2))
+  fmt.Println("id bytes: ", id)
   // TODO copy(id[9:10], checksumBytes())
-  // TODO copy(id[8:], randomBytes(length))
 
-  machineBytes := machineIdBytes(3)
-  fmt.Println("machine bytes (3): ", machineBytes)
+  id[11] = simpleChecksumByte(id[:11])
+  fmt.Println("simple checksum byte should be:", simpleChecksumByte(id[:11]))
+  fmt.Println("id bytes: ", id)
+
 
   // TODO: Then merge all together, then base32 + hex
   //       then its ready to use

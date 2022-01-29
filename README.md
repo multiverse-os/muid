@@ -7,6 +7,13 @@ Multiversal Unique ID, or `muid` (or `mid`), is an ultra lightweight id library,
 similar to `snowflake` or `xid`. Producing ids using a variety of techniques to
 build 8 to 12 byte identification that is time sortable and avoid collision. 
 
+The default currenty is:
+  4 Bytes for Timestamp (which functions as a nonce, and make it sortable)
+  3 Bytes for Machine ID
+  2 Bytes for PID
+  3 Bytes of Random
+  1 Byte for simple checksum (Add first 11 bytes and divide by 11)
+
 The library is built so that developers can customize their generated ids with
 enough resolution to reproduce MongoDB `bsonid` using a methodology which
 improves upon the existing go `bsonid` library. 
@@ -38,10 +45,12 @@ easier and resulting code footprint smaller.
 version of time, but the decision to use the 2 byte or 4 byte version is left
 to the developers using the library. 
 
-Ability to add a checksum, both a 2 byte and 4 byte version. 
+Ability to add a checksum, both a 2 byte and 4 byte version. Additionally, an
+ultra simple adding byte values and dividing by the number of bytes to give a
+single 1 byte checksum that requires no dependencies.
 
 ```
-  2..4 Bytes  + 2..3 Bytes  + 2 Bytes + 0..N Bytes + 2..4 Bytes
+  2..4 Bytes  + 2..3 Bytes  + 2 Bytes + 0..N Bytes + 1..4 Bytes
   (Timestamp)  (MachineID)     (PID)     (Random)    (Checksum)
 ```
 
