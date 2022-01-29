@@ -30,6 +30,7 @@ func main() {
   }
 
   fmt.Print(id.Deterministic("seed", 12).Base32().String(), "\n")
+  fmt.Print(id.Deterministic("seed", 12).Base32().Prefix("mv-").String(), "\n")
   fmt.Print(id.Deterministic("seed", 12).Base32().String(), "\n")
   // TODO: Add flags for various key options using multiverse-os/cmd framework
 }

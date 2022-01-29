@@ -57,6 +57,23 @@ func (self sorter) Len() int { return len(self) }
 func (self sorter) Less(i, j int) bool { return self[i].Compare(self[j]) < 0 }
 func (self sorter) Swap(i, j int) { self[i], self[j] = self[j], self[i] }
 
+// Arbitrary Text
+func (self Id) Prefix(prefix string) Id {
+  newId := make([]byte, len(self)+len(prefix))
+  copy(newId[:len(prefix)], textBytes(prefix))
+  copy(newId[len(prefix):], self)
+  return Id(newId)
+}
+
+func (self Id) Suffix(suffix string) Id {
+  newId := make([]byte, len(self)+len(suffix))
+  copy(newId[:len(suffix)], self)
+  copy(newId[len(suffix):], textBytes(suffix))
+  return Id(newId)
+}
+
+func textBytes(prefix string) []byte { return []byte(prefix) }
+
 // Format & Encoding
 func (self Id) String() string { return string(self[:]) }
 func (self Id) Bytes()  []byte { return self[:] }

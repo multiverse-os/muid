@@ -46,6 +46,7 @@ import (
 
 func main() {
   fmt.Println("id:", id.Generate().Base32().String())
+  fmt.Println("id:", id.Generate().Base32().Prefix("mv-").String())
 }
 ```
 
@@ -90,6 +91,7 @@ standard libraries.
   * **Time Sorting**
   * **Ultra Low Collision Probability**
   * **Key Hashing**
+  * **Optional Prefix**
   * **Key Compression**
   * **2..4 Timestamp Byte Length**
   * **Base32/Base64/Hex/String/Bytes Output Options**
