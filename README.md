@@ -24,6 +24,28 @@ The library is built so that developers can customize their generated ids with
 enough resolution to reproduce MongoDB `bsonid` using a methodology which
 improves upon the existing go `bsonid` library. 
 
+#### Example
+Examples are included in the project in the `cmd` folder, in addition, a simple
+command is included that simply outputs default keys, and soon will support
+various customizations using flags so that it can be easily used from any
+scripting language or other programming languages. 
+
+The simplest possible example using the library from your go application:
+
+```
+package main
+
+import (
+  "fmt"
+
+  id "github.com/multiverse-os/muid"
+)
+
+func main() {
+  fmt.Println("id:", id.Generate().Base32().String())
+}
+```
+
 ##### Why Use MUID?
 
 It uses less memory than the alternatives, for example, there are no global 
