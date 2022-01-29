@@ -8,11 +8,11 @@ similar to `snowflake` or `xid`. Producing ids using a variety of techniques to
 build 8 to 12 byte identification that is time sortable and avoid collision. 
 
 The default currenty is:
-  4 Bytes for Timestamp (which functions as a nonce, and make it sortable)
-  3 Bytes for Machine ID
-  2 Bytes for PID
-  3 Bytes of Random
-  1 Byte for simple checksum (Add first 11 bytes and divide by 11)
+  * 4 Bytes for Timestamp (which functions as a nonce, and make it sortable)
+  * 3 Bytes for Machine ID
+  * 2 Bytes for PID
+  * 3 Bytes of Random
+  * 1 Byte for simple checksum (Add first 11 bytes and divide by 11)
 
 *This project is still alpha phase, and the default may shift slightly but
 developers taking advantage of the customability of our library will be able to
@@ -82,6 +82,16 @@ fmt.Println("custom encoder:", base32Id)
 
 
 #### Features
+`muid` provides a wide variety of features, but with no dependencies beyond Go
+standard libraries. 
+
+  * **Deterministic Keys**
+  * **Checksums**
+  * **Time Sorting**
+  * **Ultra Low Collision Probability**
+  * **SHA3 Shake Hashing**
+  * **Base32/Base64/Hex/String/Bytes Output Options**
+
 `muid` utilizes a unique solution for a compressed (2 byte instead of 4 byte ) 
 version of time, but the decision to use the 2 byte or 4 byte version is left
 to the developers using the library. 

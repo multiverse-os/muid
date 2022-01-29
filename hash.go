@@ -1,4 +1,4 @@
-package id
+package muid
 
 import (
   "crypto/sha3"
