@@ -5,8 +5,6 @@ import (
   "encoding/base32"
   "encoding/hex"
 	"fmt"
-	"hash/crc32"
-  "hash/adler32"
 	"math/rand"
 	"time"
 )
@@ -55,36 +53,16 @@ func (self Id) IsNil() bool { return self == nil }
 func NilId() Id { return Id{} }
 func New() Id { return NewWithTime(time.Now()) }
 
+// TODO: Add chainable methods like this for customizing the id 
+func (self Id) Prefix(prefix string) Id {
+}
+
+func prefixBytes(prefix string) []byte { return []byte(prefix) }
+
 func NewWithTime(timestamp time.Time) Id {
   var id []byte 
   id = make([]byte, 8, 64)
 
-  var byteBuffer []byte
-
-  fmt.Println("byte buffer: %v", byteBuffer)
-
-  // TODO: Move to separate prefix method so this is optional
-  prefix := []byte("mv")
-  copy(id[:], prefix)
-
-  byteBuffer = make([]byte, 4)
-
-  // NOTE: This originally bigEndian which is why its like that now but we
-  // experimented with using littleEndian  which is TECHNICALLY PREFERRED since
-  // it would put the nonce at the start and therefore make it much simler to
-  // sort by
-
-
-
-
-
-  // NOTE: Doing it little endian gives us 2 bytes vs big endian gives us 4
-  //pid              := os.Getpid()
-  //byteBuffer = make([]byte, 2)
-  //binary.LittleEndian.PutUint16(byteBuffer, uint16(pid))
-  //fmt.Println("byte buffer: %v", byteBuffer)
-  // NOTE: All above was replaced with this single line, LIKE WOW o.O im not
-  // even a good programmer
   copy(id[6:], pidBytes())
 
 
@@ -122,17 +100,7 @@ func NewWithTime(timestamp time.Time) Id {
 
   // TODO: Add the checksum with a method to allow developer to pick which they
   // prefer OR more importantly if they want to include it. 
-  var crc32Id []byte
-  crc32Id = make([]byte, 4)
-  binary.BigEndian.PutUint32(crc32Id, crc32.ChecksumIEEE(id))
-  fmt.Println("crc32 version of id: ", crc32Id)
-  fmt.Println("string version of crc32 id: ", string(crc32Id))
 
-  var adler32Id []byte
-  adler32Id = make([]byte, 4)
-  binary.BigEndian.PutUint32(adler32Id, adler32.Checksum(id))
-  fmt.Println("adler32 version of id: ", adler32Id)
-  fmt.Println("string version of adler32 id: ", string(adler32Id))
 
   // TODO: The resulting id MUST
   //         * be easily converted to a string that is base32 or base58 or base64

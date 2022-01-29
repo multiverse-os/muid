@@ -5,6 +5,9 @@ import (
 	"sort"
 )
 
+// TODO: Ideally the resulting strings should be sortable and this may not be
+// necessary and it could probably be written better but this is on the back
+// burner for now
 type sorter []Id
 
 func (self sorter) Len() int { return len(self) }
