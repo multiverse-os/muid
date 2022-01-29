@@ -1,5 +1,9 @@
 package muid
 
+import (
+  "encoding/binary"
+  "os"
+)
 
 // TODO: Rewrite this, to match our positioning
 //func (self Id) Pid() uint16 {
@@ -9,7 +13,7 @@ package muid
 
 // TODO: Should this be big or little?
 func pidBytes() []byte {
-  byteBuffer = make([]byte, 2)
+  byteBuffer := make([]byte, 2)
   binary.LittleEndian.PutUint16(byteBuffer, uint16(os.Getpid()))
   return byteBuffer
 }

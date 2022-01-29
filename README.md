@@ -25,6 +25,9 @@ While the original inspiration comes from `bsonid` and `xid`, these libraries
 both use more resources, produce bigger ids, and their code does make use of the
 standard libraries making them hard for some developers to understand and more
 importantly hard for some developers to moidfy, customize, or contribute to. 
+For example, `xid` has a lot of code pulled from the standard library 
+`encoding/base32` to customize it to support downcased `base32`, and we simply
+use the standard library, and downcase it.
 
 `muid` like almost all Multiverse libraries uses no external dependencies, are
 written in pure Go, using only the standard libraries. Making code review,

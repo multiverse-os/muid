@@ -14,3 +14,14 @@ func (self Id) String() string {
   return ""
 }
 
+
+// TODO: Build all the necessary marshal and unmarshal functions
+
+// TODO: This should be marshal actually bc now it imples it generates an Id
+// from a string deterministically
+func FromString(seed string) (id Id, err error) {
+	//i := &Id{}
+	//err := i.UnmarshalText([]byte(seed))
+	//return *i, err
+  return id, err
+}

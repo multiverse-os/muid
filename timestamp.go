@@ -20,7 +20,7 @@ func compressTimestamp(timestamp time.Time) uint16 {
 
 func uncompressTimestamp(compressedTimestamp uint16) time.Time {
   return time.Unix(
-    int64(compressedTimestamp + uint32(fourtyYears().Seconds())),
+    int64(uint32(compressedTimestamp) + uint32(fourtyYears().Seconds())),
     0,
   ).UTC()
 }
@@ -29,15 +29,15 @@ func uncompressTimestamp(compressedTimestamp uint16) time.Time {
 //       experiment using this in the id over non-compressed time, but
 //       in the end this should be developer option
 func compressedTimestampBytes(timestamp time.Time) []byte {
-  byteBuffer = make([]byte, 2)
+  byteBuffer := make([]byte, 2)
   binary.BigEndian.PutUint16(byteBuffer, compressTimestamp(timestamp))
   return byteBuffer
 }
 
 func timestampBytes(timestamp time.Time) []byte {
-  byteBuffer = make([]byte, 4)
-	binary.BigEndian.PutUint32(byteBuffer, unixTimestamp)
-  copy(id[2:], byteBuffer)
+  byteBuffer := make([]byte, 4)
+	binary.BigEndian.PutUint32(byteBuffer, uint32(timestamp.Unix()))
+  return byteBuffer
 }
 
 // TODO: This has to be updated using our compress and uncompress timestamp

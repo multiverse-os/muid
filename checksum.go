@@ -15,13 +15,13 @@ import (
 //       of potential use cases. 
 
 func crc32ChecksumBytes(id Id) []byte {
-  byteBuffer = make([]byte, 4)
+  byteBuffer := make([]byte, 4)
   binary.BigEndian.PutUint32(byteBuffer, crc32.ChecksumIEEE(id))
   return byteBuffer
 }
 
 func adler32ChecksumBytes(id Id) []byte {
-  byteBuffer = make([]byte, 4)
+  byteBuffer := make([]byte, 4)
   binary.BigEndian.PutUint32(byteBuffer, adler32.Checksum(id))
   return byteBuffer 
 }
