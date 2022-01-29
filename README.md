@@ -24,15 +24,17 @@ The library is built so that developers can customize their generated ids with
 enough resolution to reproduce MongoDB `bsonid` using a methodology which
 improves upon the existing go `bsonid` library. 
 
-The library is designed to easily be customizable, use less memory than
-alternatives, less over-head, while acheiving the same results or even better
-using some unique techniques to shrink the byte size of the resulting ids. 
+##### Why Use MUID?
 
-The resulting Ids can easily be converted to Hex, Bytes, Base32, URL-Safe and 
-other encoding types.
+It uses less memory than the alternatives, for example, there are no global 
+variables or even constants.
 
-Additionally some 2-way hash functions to hide the source id system while still 
-providing developers a way to access all the unique features provided by `muid`.
+Overall there is less over-head, as there are no external dependencies and 
+the library just works after importing it into a project.
+
+The codebase is smaller, easier to understand, modify, and customize, while 
+not just simply ensuring feature parity with similar libraries, `muid` has
+many new features. 
 
 While the original inspiration comes from `bsonid` and `xid`, these libraries 
 both use more resources, produce bigger ids, and their code does make use of the
@@ -42,8 +44,10 @@ For example, `xid` has a lot of code pulled from the standard library
 `encoding/base32` to customize it to support downcased `base32`, and we simply
 use the standard library. 
 
-We replace about 50% of `xid` codebase with simple use of the standard go
-library `encoding/base32`:
+A simple example of this, we were able to replace ~30% of the `xid` codebase 
+with simple use of the standard go library `encoding/base32`. `xid` implements
+a custom `base32` encoding system to acheive no-padding and downcased hex
+encoding. In contrast, we replaced over 100 lines with:
            
 ```        
 encoder := base32.NewEncoding("0123456789abcdefghijklmnopqrstuv").WithPadding(base32.NoPadding)
@@ -51,9 +55,6 @@ base32Id := encoder.EncodeToString(id)
 fmt.Println("custom encoder:", base32Id)
 ```
 
-`muid` like almost all Multiverse libraries uses no external dependencies, are
-written in pure Go, using only the standard libraries. Making code review,
-easier and resulting code footprint smaller. 
 
 #### Features
 `muid` utilizes a unique solution for a compressed (2 byte instead of 4 byte ) 
@@ -83,14 +84,18 @@ The resulting Base32/Hex (default) or Hex only string is 20 bytes.
 
 The resulting URL-Safe base64 string is 16 bytes. 
 
-`xid` is 12 bytes, and `snowflake` is >12 but both use more resources and have 
-less functionality. 
 
-**A basic deterministic ID system based on a given seed is also planned.**
+Ability to easily prefix any id is already present. 
+
+*A basic deterministic ID system based on a given seed is also planned. In
+addition, the ability to hide the ID system using 2-way hashing, and various 
+options for encoding and formatting will be expanded on soon.*
+
 
 #### Commands
 Included with the project are example commands, but also a generic command which
 can produce ids so that it can easily be used with scripting languages. 
+
 
 ### Development
 Development is specifically for the Multiverse project but all of our projects

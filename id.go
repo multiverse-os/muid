@@ -9,6 +9,7 @@ type Id []byte
 
 func init() { rand.Seed(time.Now().UTC().UnixNano()) }
 
+// Generation
 func NilId() Id { return Id{} }
 
 func Generate() Id { return AtTime(time.Now()) }
@@ -23,6 +24,7 @@ func AtTime(timestamp time.Time) Id {
   return Id(id)
 }
 
+// Validations
 func (self Id) IsNil() bool { return (self == nil || len(self) == 0) }
 func (self Id) ChecksumValid() bool { return checksumValid(self[:11], self[11]) }
 func (self Id) IsValid() bool { return !self.IsNil() && self.ChecksumValid() } 
@@ -48,6 +50,7 @@ func (self Id) Prefix(prefix string) Id {
   return self
 }
 
+// Format & Encoding
 func (self Id) Base32() Id
 
 
