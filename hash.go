@@ -7,23 +7,23 @@ import (
 type HashType uint8
 
 const (
-  Undefined HashType = iota
-  Shake256 
+  NoHash HashType = iota
+  SHA3_224
+  Shake128
+  Shake256
 )
 
 // TODO: The (Id) Hash() Id chainable to hash any key 
 
 func hashBytes(hashType HashType, bytes []byte, length int) []byte {
+  idHash := make([]byte, length)
   switch hashType {
-  case Shake256:
-  	shake := sha3.NewShake256()
-		shake.Write(bytes)
-    hash := make([]byte, length)
-    _, err := shake.Read(hash)
-    if err != nil {
-      return bytes
-    }
-    return hash
+  case SHA3_224:
+    hash := sha3.Sum224(bytes)
+    return hash[:]
+  case Shake128:
+    sha3.ShakeSum256(idHash, bytes)
+    return idHash
   default: // Undefined
     return bytes
   }
