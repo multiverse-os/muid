@@ -20,6 +20,9 @@ easily guarantee their id format remains static across versions. And this
 library properly uses standard libraries making it incredibly easy to understand
 and modify as needed.*
 
+~3.67µs to generate a command using the `muid` command provided as both an
+example and a tool for scripting languages. 
+
 The library is built so that developers can customize their generated ids with
 enough resolution to reproduce MongoDB `bsonid` using a methodology which
 improves upon the existing go `bsonid` library. 
