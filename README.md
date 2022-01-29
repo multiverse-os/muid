@@ -91,7 +91,7 @@ standard libraries.
   * **Time Sorting**
   * **Ultra Low Collision Probability**
   * **Key Hashing**
-  * **Optional Prefix**
+  * **Arbitrary Text (Prefix and Suffix)**
   * **Key Compression**
   * **2..4 Timestamp Byte Length**
   * **Base32/Base64/Hex/String/Bytes Output Options**
