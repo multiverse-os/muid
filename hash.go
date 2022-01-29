@@ -1,7 +1,7 @@
 package muid
 
 import (
-  "crypto/sha3"
+  sha3 "golang.org/x/crypto/sha3"
 )
 
 type HashType uint8
@@ -11,13 +11,18 @@ const (
   Shake256 
 )
 
-func HashBytes(hashType HashType, bytes []byte, length int) []byte {
+// TODO: The (Id) Hash() Id chainable to hash any key 
+
+func hashBytes(hashType HashType, bytes []byte, length int) []byte {
   switch hashType {
   case Shake256:
   	shake := sha3.NewShake256()
 		shake.Write(bytes)
     hash := make([]byte, length)
     _, err := shake.Read(hash)
+    if err != nil {
+      return bytes
+    }
     return hash
   default: // Undefined
     return bytes

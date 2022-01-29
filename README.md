@@ -89,7 +89,9 @@ standard libraries.
   * **Checksums**
   * **Time Sorting**
   * **Ultra Low Collision Probability**
-  * **SHA3 Shake Hashing**
+  * **Key Hashing**
+  * **Key Compression**
+  * **2..4 Timestamp Byte Length**
   * **Base32/Base64/Hex/String/Bytes Output Options**
 
 `muid` utilizes a unique solution for a compressed (2 byte instead of 4 byte ) 
