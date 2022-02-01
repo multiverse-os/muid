@@ -37,31 +37,49 @@ func main() {
         Name:        "checksum",
         Alias:       "c",
         Default:     "simple",
-        Description: "Checksum type used in `muid`",
+        Description: "Hash `muid` using specified checksum alogrithm",
       },
       cli.Flag{
-        Name:        "hash",
+        Name:        "compress",
+        Alias:       "x",
+        Default:     "", // TODO: Should be bool
+        Description: "Compress `muid` using specified algorithm",
+      },
+      cli.Flag{
+        Name:        "encoding",
+        Alias:       "e", 
+        Default:     "",
+        Description: "Encode `muid` using specified algorithm",
+      },
+      cli.Flag{
+        Name:        "machine",
+        Alias:       "m",
+        Default:     "3", // TODO: Should be uint8
+        Description: "Machine Id bytes to be included in `muid`",
+      },
+      cli.Flag{
+        Name:        "pid",
+        Alias:       "p",
+        Default:     "2", // TODO: Should be uint8
+        Description: "Prociess Id (PID) bytes to be included in `muid`",
+      },
+      cli.Flag{
+        Name:        "compress",
+        Alias:       "x",
+        Default:     "",
+        Description: "Compression algorithm used on the `muid`",
+      },
+      cli.Flag{
+        Name:        "help",
         Alias:       "h",
-        Default:     "",
-        Description: "Two-way hash to conceal information stored within `muid`",
+        Default:     "", // TODO: Should be bool
+        Description: "Commands, sub-commands, flags, and descriptions of `muid` and featuers",
       },
       cli.Flag{
-        Name:        "compress",
-        Alias:       "x",
-        Default:     "",
-        Description: "Compression algorithm used on the `muid`",
-      },
-      cli.Flag{
-        Name:        "compress",
-        Alias:       "x",
-        Default:     "",
-        Description: "Compression algorithm used on the `muid`",
-      },
-      cli.Flag{
-        Name:        "compress",
-        Alias:       "x",
-        Default:     "",
-        Description: "Compression algorithm used on the `muid`",
+        Name:          "version",
+        Alias:         "v",
+        Default:       "", // TODO: Should be bool
+        Description:   "Show the current build version of `muid` command-line tool",
       },
     },
   })
