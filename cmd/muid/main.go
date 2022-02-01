@@ -51,6 +51,18 @@ func main() {
         Default:     "",
         Description: "Compression algorithm used on the `muid`",
       },
+      cli.Flag{
+        Name:        "compress",
+        Alias:       "x",
+        Default:     "",
+        Description: "Compression algorithm used on the `muid`",
+      },
+      cli.Flag{
+        Name:        "compress",
+        Alias:       "x",
+        Default:     "",
+        Description: "Compression algorithm used on the `muid`",
+      },
     },
   })
 
