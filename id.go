@@ -1,15 +1,12 @@
 package muid
 
 import (
-  "fmt"
-  //"encoding/binary"
   "bytes"
   "encoding/base32"
   "encoding/base64"
   "encoding/hex"
 	"math/rand"
   "sort"
-  //"strings"
 	"time"
 )
 
