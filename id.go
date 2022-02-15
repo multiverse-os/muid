@@ -1,12 +1,15 @@
 package muid
 
 import (
+  "fmt"
+  //"encoding/binary"
   "bytes"
   "encoding/base32"
   "encoding/base64"
   "encoding/hex"
 	"math/rand"
   "sort"
+  //"strings"
 	"time"
 )
 
@@ -14,21 +17,29 @@ type Id []byte
 
 func init() { rand.Seed(time.Now().UTC().UnixNano()) }
 
-// Generation
 func NilId() Id { return Id{} }
 
 func Generate() Id { return AtTime(time.Now()) }
 
 func Deterministic(seed string, length int) Id {
-  if length < len(seed) {
-    length = len(seed)
-  }
   id := make([]byte, length)
-  if len(seed) < length {
-    randomByteLength := length - len(seed)
-    copy(id[len(seed):], hashBytes(Shake256, []byte(seed), randomByteLength))
+  copy(id[:], hashBytes(SHA3, []byte(seed)))
+
+  id = bytes.Trim(id[:], "\x00")
+
+  padLength := length - len(id) 
+  if padLength != 0 {
+    for index := 0; index < padLength; index++ {
+      everyThirdByte := index * 3
+      var idByte byte
+      if everyThirdByte < len(id) {
+        idByte = id[everyThirdByte]
+      }
+      id = append(id, idByte)
+    }
   }
-  return Id(id)
+
+  return Id(id[:])
 }
 
 func AtTime(timestamp time.Time) Id {
@@ -57,7 +68,7 @@ func (self sorter) Len() int { return len(self) }
 func (self sorter) Less(i, j int) bool { return self[i].Compare(self[j]) < 0 }
 func (self sorter) Swap(i, j int) { self[i], self[j] = self[j], self[i] }
 
-// Arbitrary Text
+// Append Arbitrary Text
 func (self Id) Prefix(prefix string) Id {
   newId := make([]byte, len(self)+len(prefix))
   copy(newId[:len(prefix)], textBytes(prefix))
