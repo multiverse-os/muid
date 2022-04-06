@@ -13,3 +13,5 @@ const (
 func compress(compressionType CompressionType) {
 	//CompressedStream := snappy.NewWriter(Data_writer)
 }
+
+
