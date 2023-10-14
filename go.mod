@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/multiverse-os/cli v0.1.0
-	github.com/multiverse-os/data v0.1.0
+	golang.org/x/crypto v0.14.0
 )
 
-replace github.com/multiverse-os/data => github.com/multiverse-os/cli/data v0.1.0
+require golang.org/x/sys v0.13.0 // indirect
